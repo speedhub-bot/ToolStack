@@ -30,7 +30,7 @@ If you like this project, please consider giving it a ⭐ on GitHub!
 - **Instagram:** [@Akaza_isnt](https://instagram.com/Akaza_isnt)
 - **Telegram:** [@akaza_isnt](https://t.me/akaza_isnt)
 - **Discord:** @luff.y_
-- **GitHub:** [Akaza-isnt](https://github.com/Akaza-isnt)
+- **GitHub:** [@speedhub-bot](https://github.com/speedhub-bot)
 
 ---
 *Free forever. No ads. No tracking.*
