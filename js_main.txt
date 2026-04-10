@@ -1,6 +1,16 @@
 // UI Logic
 const tools = []; // Will be populated by parts
 
+// Anti-Inspect & Copy Protection
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+        (e.ctrlKey && e.key === 'U')) {
+        e.preventDefault();
+    }
+});
+
 // Cursor
 const cursor = document.getElementById('cursorGlow');
 document.addEventListener('mousemove', (e) => {

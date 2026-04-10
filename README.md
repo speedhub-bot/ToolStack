@@ -1,20 +1,36 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# ⚡ ToolStack
 
-# Run and deploy your AI Studio app
+**The Ultimate Futuristic Student Utility Hub**
 
-This contains everything you need to run your app locally.
+ToolStack is a premium, single-page web application designed specifically for students. It features 30 fully functional tools ranging from CGPA calculators and Pomodoro timers to JSON formatters and BMI calculators—all wrapped in a stunning, sci-fi inspired dark theme.
 
-View your app in AI Studio: https://ai.studio/apps/e342f744-195c-41f0-bc8c-b755fc6c5328
+Made with ❤️ by **Akash**.
 
-## Run Locally
+## ✨ Features
 
-**Prerequisites:**  Node.js
+- **30+ Built-in Tools:** Academic, Math, Productivity, Developer, Finance, and Health.
+- **Premium UI/UX:** Glassmorphism, animated aurora backgrounds, and magnetic hover effects.
+- **Lightning Fast:** 100% client-side. No server delays, no logins required.
+- **Fully Responsive:** Works flawlessly on desktop, tablet, and mobile.
+- **Secure & Protected:** Source code is obfuscated and protected against casual inspection.
 
+## 🚀 Tools Included
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- **Academic:** CGPA/SGPA Calculator, Attendance Tracker, Grade Needed.
+- **Productivity:** Pomodoro Timer, Word Counter, Reading Speed Estimator.
+- **Developer:** JSON Formatter, Base64 Encoder, Color Converter, Password Generator.
+- **Finance:** EMI, GST, SIP, and Tip Calculators.
+- **Health:** BMI, TDEE (Calorie), Sleep Cycle, OTP Generator.
+- *And many more!*
+
+## 🤝 Connect & Support
+
+If you like this project, please consider giving it a ⭐ on GitHub!
+
+- **Instagram:** [@Akaza_isnt](https://instagram.com/Akaza_isnt)
+- **Telegram:** [@akaza_isnt](https://t.me/akaza_isnt)
+- **Discord:** @luff.y_
+- **GitHub:** [Akaza-isnt](https://github.com/Akaza-isnt)
+
+---
+*Free forever. No ads. No tracking.*
