@@ -1,0 +1,190 @@
+tools.push(
+    {
+        id: 'cgpa', name: 'CGPA Calculator', icon: '🎓', category: 'academic', desc: 'Calculate CGPA based on credits and grades.',
+        renderForm: () => `
+            <div class="input-group">
+                <label>University Scale</label>
+                <select id="cgpa_scale"><option value="10">10 Point Scale</option><option value="4">4.0 Scale</option></select>
+            </div>
+            <div id="cgpa_subjects">
+                <div class="flex-row mb-2">
+                    <div class="input-group"><input type="number" placeholder="Credits" class="cgpa_c"></div>
+                    <div class="input-group"><input type="number" placeholder="Grade Point" class="cgpa_g"></div>
+                </div>
+            </div>
+            <button class="tool-btn" onclick="addSubject()" style="width:100%; margin-bottom:15px;">+ Add Subject</button>
+            
+        `,
+        calculate: () => {
+            const credits = Array.from(document.querySelectorAll('.cgpa_c')).map(i => parseFloat(i.value) || 0);
+            const grades = Array.from(document.querySelectorAll('.cgpa_g')).map(i => parseFloat(i.value) || 0);
+            let totalC = 0, totalG = 0;
+            credits.forEach((c, i) => { totalC += c; totalG += c * grades[i]; });
+            if(totalC === 0) throw new Error("Enter credits");
+            const cgpa = totalG / totalC;
+            return { value: cgpa, label: 'Your CGPA is', isString: false };
+        }
+    },
+    {
+        id: 'attendance', name: 'Attendance Calculator', icon: '📅', category: 'academic', desc: 'Check if you are safe to bunk.',
+        renderForm: () => `
+            <div class="input-group"><label>Total Classes Conducted</label><input type="number" id="att_total"></div>
+            <div class="input-group"><label>Classes Attended</label><input type="number" id="att_attended"></div>
+            <div class="input-group"><label>Target %</label><input type="number" id="att_target" value="75"></div>
+        `,
+        calculate: () => {
+            const total = parseFloat(document.getElementById('att_total').value);
+            const attended = parseFloat(document.getElementById('att_attended').value);
+            const target = parseFloat(document.getElementById('att_target').value);
+            if(!total || !attended) throw new Error("Invalid inputs");
+            const current = (attended / total) * 100;
+            let msg = `Current: ${current.toFixed(2)}%<br>`;
+            if (current >= target) {
+                const canMiss = Math.floor(attended / (target/100) - total);
+                msg += `<span style="color:var(--secondary)">You can miss ${canMiss} more classes safely.</span>`;
+            } else {
+                const need = Math.ceil((target * total - 100 * attended) / (100 - target));
+                msg += `<span style="color:#ef4444">You need to attend ${need} more classes.</span>`;
+            }
+            return { value: msg, label: 'Attendance Status', isString: true };
+        }
+    },
+    {
+        id: 'grade_needed', name: 'Grade Needed', icon: '🎯', category: 'academic', desc: 'Find out what you need in finals.',
+        renderForm: () => `
+            <div class="input-group"><label>Current Marks</label><input type="number" id="gn_current"></div>
+            <div class="input-group"><label>Total Marks So Far</label><input type="number" id="gn_total"></div>
+            <div class="input-group"><label>Target Overall %</label><input type="number" id="gn_target"></div>
+            <div class="input-group"><label>Remaining Marks</label><input type="number" id="gn_rem"></div>
+        `,
+        calculate: () => {
+            const c = parseFloat(document.getElementById('gn_current').value);
+            const t = parseFloat(document.getElementById('gn_total').value);
+            const target = parseFloat(document.getElementById('gn_target').value);
+            const r = parseFloat(document.getElementById('gn_rem').value);
+            const required = ((target / 100) * (t + r)) - c;
+            return { value: required, label: `Marks needed out of ${r}`, isString: false };
+        }
+    },
+    {
+        id: 'sgpa_cgpa', name: 'SGPA to CGPA', icon: '📊', category: 'academic', desc: 'Combine multiple semesters.',
+        renderForm: () => `
+            <div id="sgpa_list">
+                <div class="flex-row mb-2">
+                    <div class="input-group"><input type="number" placeholder="Sem Credits" class="sgpa_c"></div>
+                    <div class="input-group"><input type="number" placeholder="SGPA" class="sgpa_g"></div>
+                </div>
+            </div>
+            <button class="tool-btn" onclick="addSem()" style="width:100%; margin-bottom:15px;">+ Add Semester</button>
+            
+        `,
+        calculate: () => {
+            const credits = Array.from(document.querySelectorAll('.sgpa_c')).map(i => parseFloat(i.value) || 0);
+            const sgpas = Array.from(document.querySelectorAll('.sgpa_g')).map(i => parseFloat(i.value) || 0);
+            let tc = 0, tg = 0;
+            credits.forEach((c, i) => { tc += c; tg += c * sgpas[i]; });
+            if(tc === 0) throw new Error("Enter credits");
+            return { value: tg / tc, label: 'Overall CGPA', isString: false };
+        }
+    },
+    {
+        id: 'pct_gpa', name: 'Percentage to GPA', icon: '🔄', category: 'academic', desc: 'Convert % to 4.0 or 10.0 scale.',
+        renderForm: () => `
+            <div class="input-group"><label>Percentage (%)</label><input type="number" id="pg_pct"></div>
+            <div class="input-group"><label>Target Scale</label><select id="pg_scale"><option value="4">4.0 Scale</option><option value="10">10.0 Scale</option></select></div>
+        `,
+        calculate: () => {
+            const p = parseFloat(document.getElementById('pg_pct').value);
+            const s = parseFloat(document.getElementById('pg_scale').value);
+            if(0 > p || p > 100) throw new Error("Invalid %");
+            const res = s === 4 ? (p / 100) * 4 : (p / 9.5); // common Indian formula for 10 scale
+            return { value: res, label: `GPA on ${s} scale`, isString: false };
+        }
+    },
+    {
+        id: 'pct_calc', name: 'Percentage Calc', icon: '➗', category: 'math', desc: 'Calculate percentages easily.',
+        renderForm: () => `
+            <div class="input-group"><label>Mode</label>
+            <select id="pc_mode">
+                <option value="1">X% of Y</option>
+                <option value="2">X is what % of Y</option>
+                <option value="3">% Increase/Decrease from X to Y</option>
+            </select></div>
+            <div class="input-group"><label>Value X</label><input type="number" id="pc_x"></div>
+            <div class="input-group"><label>Value Y</label><input type="number" id="pc_y"></div>
+        `,
+        calculate: () => {
+            const m = document.getElementById('pc_mode').value;
+            const x = parseFloat(document.getElementById('pc_x').value);
+            const y = parseFloat(document.getElementById('pc_y').value);
+            let res = 0, lbl = '';
+            if(m==='1') { res = (x/100)*y; lbl = `${x}% of ${y}`; }
+            if(m==='2') { res = (x/y)*100; lbl = `${x} is % of ${y}`; }
+            if(m==='3') { res = ((y-x)/x)*100; lbl = `% change`; }
+            return { value: res, label: lbl, isString: false };
+        }
+    },
+    {
+        id: 'interest', name: 'Interest Calculator', icon: '📈', category: 'math', desc: 'Simple & Compound Interest.',
+        renderForm: () => `
+            <div class="input-group"><label>Principal (P)</label><input type="number" id="in_p"></div>
+            <div class="input-group"><label>Rate % (R)</label><input type="number" id="in_r"></div>
+            <div class="input-group"><label>Time in Years (T)</label><input type="number" id="in_t"></div>
+        `,
+        calculate: () => {
+            const p = parseFloat(document.getElementById('in_p').value);
+            const r = parseFloat(document.getElementById('in_r').value);
+            const t = parseFloat(document.getElementById('in_t').value);
+            const si = (p*r*t)/100;
+            const ci = p * Math.pow((1 + r/100), t) - p;
+            return { value: `SI: ${si.toFixed(2)}<br>CI: ${ci.toFixed(2)}`, label: 'Interest Earned', isString: true };
+        }
+    },
+    {
+        id: 'age', name: 'Age Calculator', icon: '🎂', category: 'math', desc: 'Exact age and next birthday.',
+        renderForm: () => `
+            <div class="input-group"><label>Date of Birth</label><input type="date" id="ag_dob"></div>
+        `,
+        calculate: () => {
+            const dob = new Date(document.getElementById('ag_dob').value);
+            const diff = Date.now() - dob.getTime();
+            const ageDate = new Date(diff);
+            const y = Math.abs(ageDate.getUTCFullYear() - 1970);
+            return { value: `${y} Years`, label: 'Your exact age', isString: true };
+        }
+    },
+    {
+        id: 'date_diff', name: 'Date Difference', icon: '🗓️', category: 'math', desc: 'Days between two dates.',
+        renderForm: () => `
+            <div class="input-group"><label>Start Date</label><input type="date" id="dd_start"></div>
+            <div class="input-group"><label>End Date</label><input type="date" id="dd_end"></div>
+        `,
+        calculate: () => {
+            const d1 = new Date(document.getElementById('dd_start').value);
+            const d2 = new Date(document.getElementById('dd_end').value);
+            const diffTime = Math.abs(d2 - d1);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return { value: diffDays, label: 'Days difference', isString: false };
+        }
+    },
+    {
+        id: 'unit_conv', name: 'Unit Converter', icon: '📏', category: 'math', desc: 'Length, weight, temp.',
+        renderForm: () => `
+            <div class="input-group"><label>Value</label><input type="number" id="uc_val"></div>
+            <div class="flex-row">
+                <div class="input-group"><select id="uc_from"><option value="km">Km</option><option value="m">Meter</option><option value="mi">Miles</option></select></div>
+                <div class="input-group"><select id="uc_to"><option value="km">Km</option><option value="m">Meter</option><option value="mi">Miles</option></select></div>
+            </div>
+        `,
+        calculate: () => {
+            const v = parseFloat(document.getElementById('uc_val').value);
+            const f = document.getElementById('uc_from').value;
+            const t = document.getElementById('uc_to').value;
+            let m = v;
+            if(f==='km') m = v*1000; if(f==='mi') m = v*1609.34;
+            let res = m;
+            if(t==='km') res = m/1000; if(t==='mi') res = m/1609.34;
+            return { value: res, label: 'Converted Value', isString: false };
+        }
+    }
+);

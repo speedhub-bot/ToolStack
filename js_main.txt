@@ -1,0 +1,227 @@
+// UI Logic
+const tools = []; // Will be populated by parts
+
+// Cursor
+const cursor = document.getElementById('cursorGlow');
+document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+});
+
+// Logo Magnetic Effect
+const mainLogo = document.getElementById('mainLogo');
+if (mainLogo) {
+    mainLogo.addEventListener('mousemove', (e) => {
+        const rect = mainLogo.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        mainLogo.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px) rotateX(${-y * 0.5}deg) rotateY(${x * 0.5}deg) scale(1.05)`;
+    });
+    mainLogo.addEventListener('mouseleave', () => {
+        mainLogo.style.transform = `translate(0px, 0px) rotateX(0deg) rotateY(0deg) scale(1)`;
+        mainLogo.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    });
+    mainLogo.addEventListener('mouseenter', () => {
+        mainLogo.style.transition = 'none';
+    });
+}
+
+// Navbar & Back to top
+const navbar = document.getElementById('navbar');
+const backToTop = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) navbar.classList.add('scrolled');
+    else navbar.classList.remove('scrolled');
+    
+    if (window.scrollY > 300) backToTop.classList.add('visible');
+    else backToTop.classList.remove('visible');
+});
+backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// Hero Title Animation
+const title = document.getElementById('heroTitle');
+const text = title.innerText;
+title.innerHTML = '';
+text.split('').forEach((char, i) => {
+    const span = document.createElement('span');
+    span.innerText = char === ' ' ? '\u00A0' : char;
+    span.style.animationDelay = (i * 0.05) + 's';
+    title.appendChild(span);
+});
+
+// Toast
+function showToast(msg) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+
+// Modal
+const modalOverlay = document.getElementById('modalOverlay');
+const modalClose = document.getElementById('modalClose');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+const resultBox = document.getElementById('resultBox');
+const resultValue = document.getElementById('resultValue');
+const resultExtra = document.getElementById('resultExtra');
+const copyBtn = document.getElementById('copyResultBtn');
+let currentTool = null;
+
+function openModal(toolId) {
+    const tool = tools.find(t => t.id === toolId);
+    if (!tool) return;
+    currentTool = tool;
+    modalTitle.innerHTML = `<span class="tool-icon">${tool.icon}</span> ${tool.name}`;
+    modalBody.innerHTML = tool.renderForm();
+    resultBox.classList.remove('active');
+    
+    const calcBtn = document.createElement('button');
+    calcBtn.className = 'calc-btn';
+    calcBtn.innerText = 'Calculate';
+    calcBtn.onclick = () => {
+        try {
+            const res = tool.calculate();
+            if (res) {
+                resultExtra.innerText = res.label || '';
+                animateValue(resultValue, 0, res.value, 1000, res.isString);
+                resultBox.classList.add('active');
+            }
+        } catch (e) {
+            showToast(e.message || 'Error in calculation');
+        }
+    };
+    modalBody.appendChild(calcBtn);
+    
+    // Add custom listeners if any
+    if(tool.onLoad) tool.onLoad();
+
+    modalOverlay.classList.add('active');
+}
+
+modalClose.onclick = () => {
+    modalOverlay.classList.remove('active');
+    if(currentTool && currentTool.onClose) currentTool.onClose();
+};
+modalOverlay.onclick = (e) => {
+    if (e.target === modalOverlay) {
+        modalOverlay.classList.remove('active');
+        if(currentTool && currentTool.onClose) currentTool.onClose();
+    }
+};
+
+copyBtn.onclick = () => {
+    navigator.clipboard.writeText(resultValue.innerText);
+    showToast('Result copied!');
+};
+
+// Animate Value
+function animateValue(obj, start, end, duration, isString) {
+    if (isString) {
+        obj.innerHTML = end;
+        return;
+    }
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const current = progress * (end - start) + start;
+        obj.innerHTML = Number.isInteger(end) ? Math.floor(current) : current.toFixed(2);
+        if (1 > progress) {
+            window.requestAnimationFrame(step);
+        } else {
+            obj.innerHTML = end;
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// Render Grid
+const grid = document.getElementById('toolsGrid');
+function renderGrid(filterText = '', category = 'all') {
+    grid.innerHTML = '';
+    let count = 0;
+    tools.forEach((tool, i) => {
+        if (category !== 'all' && tool.category !== category) return;
+        if (filterText && !tool.name.toLowerCase().includes(filterText.toLowerCase()) && !tool.desc.toLowerCase().includes(filterText.toLowerCase())) return;
+        
+        count++;
+        const card = document.createElement('div');
+        card.className = 'tool-card';
+        card.style.animationDelay = (i * 0.05) + 's';
+        card.innerHTML = `
+            ${tool.isNew ? '<div class="badge-new">NEW</div>' : ''}
+            <div class="tool-icon">${tool.icon}</div>
+            <div class="tool-name">${tool.name}</div>
+            <div class="tool-desc">${tool.desc}</div>
+            <button class="tool-btn" onclick="openModal('${tool.id}')">Open Tool →</button>
+        `;
+        grid.appendChild(card);
+    });
+    if (count === 0) {
+        grid.innerHTML = '<div class="no-results">No tool found — suggest one?</div>';
+    }
+}
+
+// Search & Filter
+const searchInput = document.getElementById('searchInput');
+const filterBtns = document.querySelectorAll('.filter-btn');
+let currentCategory = 'all';
+
+searchInput.addEventListener('input', (e) => renderGrid(e.target.value, currentCategory));
+
+filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = btn.dataset.filter;
+        renderGrid(searchInput.value, currentCategory);
+    });
+});
+
+// Favicon Trick
+const canvas = document.createElement('canvas');
+canvas.height = 64;
+canvas.width = 64;
+const ctx = canvas.getContext('2d');
+ctx.font = '48px serif';
+ctx.fillText('⚡', 8, 48);
+const link = document.createElement('link');
+link.rel = 'icon';
+link.href = canvas.toDataURL();
+document.head.appendChild(link);
+
+// Global functions for tools
+window.addSubject = function() {
+    const div = document.createElement('div');
+    div.className = 'flex-row mb-2';
+    div.innerHTML = '<div class="input-group"><input type="number" placeholder="Credits" class="cgpa_c"></div><div class="input-group"><input type="number" placeholder="Grade Point" class="cgpa_g"></div>';
+    document.getElementById('cgpa_subjects').appendChild(div);
+};
+
+window.addSem = function() {
+    const div = document.createElement('div');
+    div.className = 'flex-row mb-2';
+    div.innerHTML = '<div class="input-group"><input type="number" placeholder="Sem Credits" class="sgpa_c"></div><div class="input-group"><input type="number" placeholder="SGPA" class="sgpa_g"></div>';
+    document.getElementById('sgpa_list').appendChild(div);
+};
+
+window.pomoInt = null;
+window.startPomo = function() {
+    let t = 25 * 60;
+    clearInterval(window.pomoInt);
+    window.pomoInt = setInterval(() => {
+        t--;
+        const m = Math.floor(t/60).toString().padStart(2,'0');
+        const s = (t%60).toString().padStart(2,'0');
+        document.getElementById('pomo_display').innerText = m+':'+s;
+        if(t<=0) { clearInterval(window.pomoInt); alert('Time up!'); }
+    }, 1000);
+};
+window.stopPomo = function() { clearInterval(window.pomoInt); };

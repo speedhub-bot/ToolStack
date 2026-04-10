@@ -1,0 +1,58 @@
+<div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+<div class="bg-grid"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<nav id="navbar">
+    <div class="logo" id="mainLogo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">ToolStack</span>
+    </div>
+    <div class="tagline">Every tool a student needs.</div>
+</nav>
+
+<header class="hero">
+    <h1 class="hero-title" id="heroTitle">ToolStack</h1>
+    <p class="hero-subtitle">Free. Fast. No login required.</p>
+    <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search for a tool...">
+    </div>
+    <div class="filters" id="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="academic">📚 Academic</button>
+        <button class="filter-btn" data-filter="math">🔢 Math & Numbers</button>
+        <button class="filter-btn" data-filter="productivity">⏱️ Productivity</button>
+        <button class="filter-btn" data-filter="tech">💻 Developer / Tech</button>
+        <button class="filter-btn" data-filter="finance">💰 Finance</button>
+        <button class="filter-btn" data-filter="health">🧬 Health & General</button>
+    </div>
+</header>
+
+<main class="container">
+    <div class="tools-grid" id="toolsGrid">
+        <!-- Cards injected by JS -->
+    </div>
+</main>
+
+<footer>
+    <p>Made with ❤️ by Akash. Free forever.</p>
+</footer>
+
+<button class="back-to-top" id="backToTop">↑</button>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content" id="modalContent">
+        <button class="modal-close" id="modalClose">×</button>
+        <div class="modal-title" id="modalTitle"></div>
+        <div id="modalBody"></div>
+        <div class="result-box" id="resultBox">
+            <div class="result-extra" id="resultExtra"></div>
+            <div class="result-value" id="resultValue"></div>
+            <button class="copy-btn" id="copyResultBtn">Copy Result</button>
+        </div>
+    </div>
+</div>

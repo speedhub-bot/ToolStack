@@ -1,0 +1,151 @@
+tools.push(
+    {
+        id: 'slug', name: 'Word to Slug', icon: '🔗', category: 'dev', desc: 'URL-friendly strings.',
+        renderForm: () => `
+            <div class="input-group"><label>Text</label><input type="text" id="sl_val"></div>
+        `,
+        calculate: () => {
+            const v = document.getElementById('sl_val').value;
+            const slug = v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            return { value: slug, label: 'Slug', isString: true };
+        }
+    },
+    {
+        id: 'reverse', name: 'String Reverser', icon: '🔄', category: 'dev', desc: 'Reverse text or characters.',
+        renderForm: () => `
+            <div class="input-group"><label>Text</label><input type="text" id="rev_val"></div>
+        `,
+        calculate: () => {
+            const v = document.getElementById('rev_val').value;
+            return { value: v.split('').reverse().join(''), label: 'Reversed', isString: true };
+        }
+    },
+    {
+        id: 'emi', name: 'EMI Calculator', icon: '💳', category: 'finance', desc: 'Loan EMI calculation.',
+        renderForm: () => `
+            <div class="input-group"><label>Loan Amount</label><input type="number" id="emi_p"></div>
+            <div class="input-group"><label>Interest Rate (Yearly %)</label><input type="number" id="emi_r"></div>
+            <div class="input-group"><label>Tenure (Months)</label><input type="number" id="emi_n"></div>
+        `,
+        calculate: () => {
+            const p = parseFloat(document.getElementById('emi_p').value);
+            const r = parseFloat(document.getElementById('emi_r').value) / 12 / 100;
+            const n = parseFloat(document.getElementById('emi_n').value);
+            const emi = p * r * (Math.pow(1+r, n) / (Math.pow(1+r, n) - 1));
+            return { value: emi, label: 'Monthly EMI', isString: false };
+        }
+    },
+    {
+        id: 'gst', name: 'GST Calculator', icon: '🧾', category: 'finance', desc: 'Add or remove GST.',
+        renderForm: () => `
+            <div class="input-group"><label>Amount</label><input type="number" id="gst_amt"></div>
+            <div class="input-group"><label>GST %</label><select id="gst_pct"><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option></select></div>
+            <div class="input-group"><label>Action</label><select id="gst_act"><option value="add">Add GST</option><option value="rem">Remove GST</option></select></div>
+        `,
+        calculate: () => {
+            const a = parseFloat(document.getElementById('gst_amt').value);
+            const p = parseFloat(document.getElementById('gst_pct').value);
+            const act = document.getElementById('gst_act').value;
+            let res = 0;
+            if(act === 'add') res = a + (a * p / 100);
+            else res = a - (a * (p / (100 + p)));
+            return { value: res, label: 'Final Amount', isString: false };
+        }
+    },
+    {
+        id: 'tip', name: 'Tip Calculator', icon: '💁', category: 'finance', desc: 'Split bills & tips.',
+        renderForm: () => `
+            <div class="input-group"><label>Bill Amount</label><input type="number" id="tip_amt"></div>
+            <div class="input-group"><label>Tip %</label><input type="number" id="tip_pct" value="10"></div>
+            <div class="input-group"><label>Split Between (Persons)</label><input type="number" id="tip_split" value="1"></div>
+        `,
+        calculate: () => {
+            const a = parseFloat(document.getElementById('tip_amt').value);
+            const p = parseFloat(document.getElementById('tip_pct').value);
+            const s = parseFloat(document.getElementById('tip_split').value);
+            const total = a + (a * p / 100);
+            return { value: total / s, label: 'Per Person', isString: false };
+        }
+    },
+    {
+        id: 'sip', name: 'SIP Calculator', icon: '📈', category: 'finance', desc: 'Mutual fund returns.', isNew: true,
+        renderForm: () => `
+            <div class="input-group"><label>Monthly Investment</label><input type="number" id="sip_p"></div>
+            <div class="input-group"><label>Expected Return (% p.a)</label><input type="number" id="sip_r" value="12"></div>
+            <div class="input-group"><label>Time Period (Years)</label><input type="number" id="sip_t"></div>
+        `,
+        calculate: () => {
+            const p = parseFloat(document.getElementById('sip_p').value);
+            const r = parseFloat(document.getElementById('sip_r').value) / 12 / 100;
+            const n = parseFloat(document.getElementById('sip_t').value) * 12;
+            const m = p * ((Math.pow(1+r, n) - 1) / r) * (1+r);
+            return { value: m, label: 'Expected Amount', isString: false };
+        }
+    },
+    {
+        id: 'bmi', name: 'BMI Calculator', icon: '⚖️', category: 'health', desc: 'Body Mass Index.',
+        renderForm: () => `
+            <div class="input-group"><label>Weight (kg)</label><input type="number" id="bmi_w"></div>
+            <div class="input-group"><label>Height (cm)</label><input type="number" id="bmi_h"></div>
+        `,
+        calculate: () => {
+            const w = parseFloat(document.getElementById('bmi_w').value);
+            const h = parseFloat(document.getElementById('bmi_h').value) / 100;
+            const bmi = w / (h * h);
+            let cat = '';
+            if(18.5 > bmi) cat = 'Underweight';
+            else if(25 > bmi) cat = 'Normal';
+            else if(30 > bmi) cat = 'Overweight';
+            else cat = 'Obese';
+            return { value: `${bmi.toFixed(1)} (${cat})`, label: 'Your BMI', isString: true };
+        }
+    },
+    {
+        id: 'tdee', name: 'Calorie Estimator', icon: '🔥', category: 'health', desc: 'Daily calorie needs.',
+        renderForm: () => `
+            <div class="input-group"><label>Weight (kg)</label><input type="number" id="td_w"></div>
+            <div class="input-group"><label>Height (cm)</label><input type="number" id="td_h"></div>
+            <div class="input-group"><label>Age</label><input type="number" id="td_a"></div>
+            <div class="input-group"><label>Activity</label><select id="td_act"><option value="1.2">Sedentary</option><option value="1.55">Moderate</option><option value="1.9">Active</option></select></div>
+        `,
+        calculate: () => {
+            const w = parseFloat(document.getElementById('td_w').value);
+            const h = parseFloat(document.getElementById('td_h').value);
+            const a = parseFloat(document.getElementById('td_a').value);
+            const act = parseFloat(document.getElementById('td_act').value);
+            const bmr = 10 * w + 6.25 * h - 5 * a + 5; // simplified male
+            return { value: bmr * act, label: 'Calories/Day', isString: false };
+        }
+    },
+    {
+        id: 'sleep', name: 'Sleep Cycle', icon: '🌙', category: 'health', desc: 'When to wake up.', isNew: true,
+        renderForm: () => `
+            <div class="input-group"><label>I want to wake up at</label><input type="time" id="sl_time"></div>
+        `,
+        calculate: () => {
+            const t = document.getElementById('sl_time').value;
+            if(!t) throw new Error("Select time");
+            const [h, m] = t.split(':');
+            let d = new Date(); d.setHours(h); d.setMinutes(m);
+            // 90 min cycles, 15 min fall asleep
+            let res = [];
+            for(let i=6; i>=3; i--) {
+                let w = new Date(d.getTime() - (i*90 + 15)*60000);
+                res.push(w.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+            }
+            return { value: res.join(' OR '), label: 'Go to bed at', isString: true };
+        }
+    },
+    {
+        id: 'otp', name: 'OTP Generator', icon: '📱', category: 'health', desc: 'Random numeric OTP.',
+        renderForm: () => `
+            <div class="input-group"><label>Length</label><input type="number" id="otp_len" value="6"></div>
+        `,
+        calculate: () => {
+            const l = parseInt(document.getElementById('otp_len').value);
+            let otp = '';
+            for(let i=0; l>i; i++) otp += Math.floor(Math.random() * 10);
+            return { value: otp, label: 'Your OTP', isString: true };
+        }
+    }
+);

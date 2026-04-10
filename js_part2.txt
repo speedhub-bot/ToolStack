@@ -1,0 +1,164 @@
+tools.push(
+    {
+        id: 'num_sys', name: 'Number System', icon: '🔢', category: 'math', desc: 'Binary, Hex, Decimal.',
+        renderForm: () => `
+            <div class="input-group"><label>Value</label><input type="text" id="ns_val"></div>
+            <div class="flex-row">
+                <div class="input-group"><label>From</label><select id="ns_from"><option value="10">Decimal</option><option value="2">Binary</option><option value="16">Hex</option></select></div>
+                <div class="input-group"><label>To</label><select id="ns_to"><option value="10">Decimal</option><option value="2">Binary</option><option value="16">Hex</option></select></div>
+            </div>
+        `,
+        calculate: () => {
+            const v = document.getElementById('ns_val').value;
+            const f = parseInt(document.getElementById('ns_from').value);
+            const t = parseInt(document.getElementById('ns_to').value);
+            const dec = parseInt(v, f);
+            if(isNaN(dec)) throw new Error("Invalid input for base");
+            return { value: dec.toString(t).toUpperCase(), label: 'Result', isString: true };
+        }
+    },
+    {
+        id: 'roman', name: 'Roman Numerals', icon: '🏛️', category: 'math', desc: 'Number ↔ Roman.',
+        renderForm: () => `
+            <div class="input-group"><label>Value (Number or Roman)</label><input type="text" id="rm_val"></div>
+        `,
+        calculate: () => {
+            const v = document.getElementById('rm_val').value.toUpperCase();
+            if(!isNaN(v)) {
+                let num = parseInt(v);
+                const lookup = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
+                let roman = '';
+                for (let i in lookup) {
+                    while (num >= lookup[i]) { roman += i; num -= lookup[i]; }
+                }
+                return { value: roman, label: 'Roman Numeral', isString: true };
+            } else {
+                const romanToInt = {I:1,V:5,X:10,L:50,C:100,D:500,M:1000};
+                let num = 0;
+                for(let i=0; v.length>i; i++) {
+                    const cur = romanToInt[v[i]], next = romanToInt[v[i+1]];
+                    if(next && next > cur) { num += next - cur; i++; }
+                    else num += cur;
+                }
+                return { value: num, label: 'Integer Value', isString: false };
+            }
+        }
+    },
+    {
+        id: 'pomodoro', name: 'Pomodoro Timer', icon: '🍅', category: 'productivity', desc: 'Focus timer with alerts.',
+        renderForm: () => `
+            <div class="pomodoro-circle" id="pomo_display">25:00</div>
+            <div class="flex-row">
+                <button class="tool-btn" onclick="startPomo()" style="flex:1; margin-right:10px;">Start</button>
+                <button class="tool-btn" onclick="stopPomo()" style="flex:1; background:var(--surface)">Stop</button>
+            </div>
+            
+        `,
+        calculate: () => { return { value: 'Timer running...', label: 'Status', isString: true }; },
+        onClose: () => { if(window.pomoInt) clearInterval(window.pomoInt); }
+    },
+    {
+        id: 'word_count', name: 'Word Counter', icon: '📝', category: 'productivity', desc: 'Count words, chars, paras.',
+        renderForm: () => `
+            <div class="input-group"><label>Text</label><textarea id="wc_text" rows="5" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:12px; border-radius:8px;"></textarea></div>
+        `,
+        calculate: () => {
+            const t = document.getElementById('wc_text').value;
+            const words = t.trim().split(/\s+/).filter(w=>w.length>0).length;
+            const chars = t.length;
+            return { value: `Words: ${words} | Chars: ${chars}`, label: 'Count', isString: true };
+        }
+    },
+    {
+        id: 'read_speed', name: 'Reading Speed', icon: '📖', category: 'productivity', desc: 'Estimate reading time.',
+        renderForm: () => `
+            <div class="input-group"><label>Text or Word Count</label><textarea id="rs_text" rows="4" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:12px; border-radius:8px;"></textarea></div>
+            <div class="input-group"><label>Speed (WPM)</label><input type="number" id="rs_wpm" value="200"></div>
+        `,
+        calculate: () => {
+            const t = document.getElementById('rs_text').value;
+            const wpm = parseFloat(document.getElementById('rs_wpm').value);
+            let words = parseInt(t);
+            if(isNaN(words)) words = t.trim().split(/\s+/).filter(w=>w.length>0).length;
+            const min = words / wpm;
+            return { value: `${Math.ceil(min)} Min`, label: 'Estimated Time', isString: true };
+        }
+    },
+    {
+        id: 'study_plan', name: 'Study Planner', icon: '⏱️', category: 'productivity', desc: 'Divide topics by hours.',
+        renderForm: () => `
+            <div class="input-group"><label>Total Hours Available</label><input type="number" id="sp_hrs"></div>
+            <div class="input-group"><label>Number of Topics</label><input type="number" id="sp_topics"></div>
+        `,
+        calculate: () => {
+            const h = parseFloat(document.getElementById('sp_hrs').value);
+            const t = parseFloat(document.getElementById('sp_topics').value);
+            const per = (h / t) * 60;
+            return { value: `${per.toFixed(0)} Min / Topic`, label: 'Time Allocation', isString: true };
+        }
+    },
+    {
+        id: 'pwd_gen', name: 'Password Gen', icon: '🔑', category: 'dev', desc: 'Strong random passwords.',
+        renderForm: () => `
+            <div class="input-group"><label>Length</label><input type="number" id="pg_len" value="16"></div>
+            <div class="flex-row" style="gap:10px; margin-bottom:15px;">
+                <label><input type="checkbox" id="pg_num" checked> Numbers</label>
+                <label><input type="checkbox" id="pg_sym" checked> Symbols</label>
+            </div>
+        `,
+        calculate: () => {
+            const l = parseInt(document.getElementById('pg_len').value);
+            const n = document.getElementById('pg_num').checked;
+            const s = document.getElementById('pg_sym').checked;
+            let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            if(n) chars += '0123456789';
+            if(s) chars += '!@#$%^&*()_+~`|}{[]:;?>\x3C,./-=';
+            let pwd = '';
+            for(let i=0; l>i; i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+            return { value: pwd, label: 'Generated Password', isString: true };
+        }
+    },
+    {
+        id: 'color_conv', name: 'Color Converter', icon: '🎨', category: 'dev', desc: 'HEX ↔ RGB ↔ HSL.',
+        renderForm: () => `
+            <div class="input-group"><label>Color (HEX, RGB, or HSL)</label><input type="text" id="cc_val" placeholder="#8b5cf6"></div>
+            <div class="color-preview" id="cc_prev"></div>
+        `,
+        calculate: () => {
+            const v = document.getElementById('cc_val').value.trim();
+            document.getElementById('cc_prev').style.background = v;
+            // Simple hex to rgb for demo
+            if(v.startsWith('#')) {
+                let r = parseInt(v.slice(1,3),16), g = parseInt(v.slice(3,5),16), b = parseInt(v.slice(5,7),16);
+                return { value: `rgb(${r}, ${g}, ${b})`, label: 'RGB Value', isString: true };
+            }
+            return { value: v, label: 'Color', isString: true };
+        }
+    },
+    {
+        id: 'json_fmt', name: 'JSON Formatter', icon: '{}', category: 'dev', desc: 'Format & validate JSON.', isNew: true,
+        renderForm: () => `
+            <div class="input-group"><label>Raw JSON</label><textarea id="jf_val" rows="5" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:12px; border-radius:8px; font-family:monospace;"></textarea></div>
+        `,
+        calculate: () => {
+            try {
+                const obj = JSON.parse(document.getElementById('jf_val').value);
+                return { value: JSON.stringify(obj, null, 2), label: 'Formatted JSON', isString: true };
+            } catch(e) { throw new Error("Invalid JSON"); }
+        }
+    },
+    {
+        id: 'base64', name: 'Base64 Encode', icon: '🔤', category: 'dev', desc: 'Encode/Decode strings.',
+        renderForm: () => `
+            <div class="input-group"><label>Text</label><textarea id="b64_val" rows="3" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:12px; border-radius:8px;"></textarea></div>
+            <div class="input-group"><label>Action</label><select id="b64_act"><option value="enc">Encode</option><option value="dec">Decode</option></select></div>
+        `,
+        calculate: () => {
+            const v = document.getElementById('b64_val').value;
+            const a = document.getElementById('b64_act').value;
+            try {
+                return { value: a==='enc' ? btoa(v) : atob(v), label: 'Result', isString: true };
+            } catch(e) { throw new Error("Invalid string"); }
+        }
+    }
+);
